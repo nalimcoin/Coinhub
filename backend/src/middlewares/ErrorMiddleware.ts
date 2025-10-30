@@ -5,7 +5,7 @@ export class ErrorMiddleware {
     error: Error,
     req: Request,
     res: Response,
-    next: NextFunction
+    _next: NextFunction
   ): void => {
     console.error('[ERROR]', {
       timestamp: new Date().toISOString(),
@@ -58,7 +58,7 @@ export class ErrorMiddleware {
     res.status(statusCode).json(response);
   };
 
-  public static notFound = (req: Request, res: Response): void => {
+  public static notFound = (_req: Request, res: Response): void => {
     res.status(404).json({
       error: 'Route not found',
     });

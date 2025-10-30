@@ -25,16 +25,16 @@ export class AuthService {
     try {
       const email = new Email(emailStr);
       const user = await this.userRepository.findByEmail(email);
-      
+
       if (!user) {
         throw new Error('Invalid credentials');
       }
       const isPasswordValid = await user.verifyPassword(passwordStr);
-      
+
       if (!isPasswordValid) {
         throw new Error('Invalid credentials');
       }
-      const accessToken = this.jwtService.generateToken(user);
+      const accessToken = await this.jwtService.generateToken(user);
 
       return {
         accessToken,
@@ -51,11 +51,11 @@ export class AuthService {
     }
   }
 
-  public async register(emailStr: string, passwordStr: string): Promise<AuthResponse> {
+  public async register(emailStr: string, passwordStr: string, firstName: string, lastName: string): Promise<AuthResponse> {
     const email = new Email(emailStr);
     const password = await Password.createFromPlainText(passwordStr);
-    const user = await this.userRepository.create(email, password);
-    const accessToken = this.jwtService.generateToken(user);
+    const user = await this.userRepository.create(email, password, firstName, lastName);
+    const accessToken = await this.jwtService.generateToken(user);
 
     return {
       accessToken,
@@ -67,7 +67,7 @@ export class AuthService {
   }
 
   public async verifyToken(token: string): Promise<User> {
-    const payload = this.jwtService.verifyToken(token);
+    const payload = await this.jwtService.verifyToken(token);
     const user = await this.userRepository.findById(payload.userId);
 
     if (!user) {

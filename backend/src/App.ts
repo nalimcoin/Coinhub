@@ -8,10 +8,12 @@ import { UserRepository } from './repositories/UserRepository';
 import { JwtService } from './services/JwtService';
 import { AuthService } from './services/AuthService';
 import { AuthController } from './controllers/AuthController';
+import { UserController } from './controllers/UserController';
 import { AuthMiddleware } from './middlewares/AuthMiddleware';
 import { ErrorMiddleware } from './middlewares/ErrorMiddleware';
 import { SanitizationMiddleware } from './middlewares/SanitizationMiddleware';
 import { AuthRoutes } from './routes/AuthRoutes';
+import { UserRoutes } from './routes/UserRoutes';
 
 export class App {
   private app: Application;
@@ -62,7 +64,7 @@ export class App {
     this.app.use(SanitizationMiddleware.sanitize);
 
     if (process.env.NODE_ENV === 'development') {
-      this.app.use((req: Request, res: Response, next) => {
+      this.app.use((req: Request, _res: Response, next) => {
         console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
         next();
       });
@@ -70,7 +72,7 @@ export class App {
   }
 
   private configureRoutes(): void {
-    this.app.get('/health', (req: Request, res: Response) => {
+    this.app.get('/health', (_req: Request, res: Response) => {
       res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
     });
 
@@ -81,10 +83,14 @@ export class App {
     );
     const authService = new AuthService(userRepository, jwtService);
     const authController = new AuthController(authService);
+    const userController = new UserController(userRepository);
     const authMiddleware = new AuthMiddleware(jwtService);
 
     const authRoutes = new AuthRoutes(authController, authMiddleware);
+    const userRoutes = new UserRoutes(userController, authMiddleware);
+
     this.app.use('/api/auth', authRoutes.getRouter());
+    this.app.use('/api/users', userRoutes.getRouter());
   }
 
   private configureErrorHandling(): void {

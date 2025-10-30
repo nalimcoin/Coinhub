@@ -4,7 +4,6 @@ import { JwtService } from '../services/JwtService';
 export interface AuthenticatedRequest extends Request {
   user?: {
     userId: number;
-    email: string;
   };
 }
 
@@ -15,11 +14,11 @@ export class AuthMiddleware {
     this.jwtService = jwtService;
   }
 
-  public authenticate = (
+  public authenticate = async (
     req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
-  ): void => {
+  ): Promise<void> => {
     try {
       const authHeader = req.headers.authorization;
 
@@ -29,18 +28,17 @@ export class AuthMiddleware {
       }
 
       const parts = authHeader.split(' ');
-      
+
       if (parts.length !== 2 || parts[0] !== 'Bearer') {
         res.status(401).json({ error: 'Invalid authorization format' });
         return;
       }
 
       const token = parts[1];
-      const payload = this.jwtService.verifyToken(token);
+      const payload = await this.jwtService.verifyToken(token);
 
       req.user = {
         userId: payload.userId,
-        email: payload.email,
       };
 
       next();

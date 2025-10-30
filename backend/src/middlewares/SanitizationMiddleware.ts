@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as xss from 'xss';
+import xss from 'xss';
 
 export class SanitizationMiddleware {
   private static sanitizeObject(obj: any): any {
@@ -26,7 +26,7 @@ export class SanitizationMiddleware {
 
   public static sanitize = (
     req: Request,
-    res: Response,
+    _res: Response,
     next: NextFunction
   ): void => {
     if (req.body) {

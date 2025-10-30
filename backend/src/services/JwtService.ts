@@ -1,53 +1,53 @@
-import * as jwt from 'jsonwebtoken';
+import { SignJWT, jwtVerify, JWTPayload } from 'jose';
 import { User } from '../models/User';
 
-export interface JwtPayload {
+export interface JwtPayload extends JWTPayload {
   userId: number;
-  email: string;
-  iat?: number;
-  exp?: number;
 }
 
 export class JwtService {
-  private readonly secret: string;
+  private readonly secret: Uint8Array;
   private readonly expiresIn: string;
 
   constructor(secret: string, expiresIn: string = '1h') {
     if (!secret || secret.length < 32) {
       throw new Error('JWT secret must be at least 32 characters long');
     }
-    
-    this.secret = secret;
+
+    this.secret = new TextEncoder().encode(secret);
     this.expiresIn = expiresIn;
   }
 
-  public generateToken(user: User): string {
-    const payload: JwtPayload = {
-      userId: user.getId(),
-      email: user.getEmail().getValue(),
-    };
+  public async generateToken(user: User): Promise<string> {
+    const token = await new SignJWT({ userId: user.getId() })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime(this.expiresIn)
+      .sign(this.secret);
 
-    return jwt.sign(payload, this.secret, {
-      expiresIn: this.expiresIn,
-      algorithm: 'HS256',
-    });
+    return token;
   }
 
-  public verifyToken(token: string): JwtPayload {
+  public async verifyToken(token: string): Promise<JwtPayload> {
     try {
-      const decoded = jwt.verify(token, this.secret, {
+      const { payload } = await jwtVerify(token, this.secret, {
         algorithms: ['HS256'],
-      }) as JwtPayload;
+      });
 
-      return decoded;
-    } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) {
-        throw new Error('Token has expired');
-      } else if (error instanceof jwt.JsonWebTokenError) {
-        throw new Error('Invalid token');
-      } else {
-        throw new Error('Token verification failed');
+      if (!payload.userId || typeof payload.userId !== 'number') {
+        throw new Error('Invalid token payload');
       }
+
+      return payload as JwtPayload;
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message.includes('expired')) {
+          throw new Error('Token has expired');
+        } else if (error.message.includes('invalid')) {
+          throw new Error('Invalid token');
+        }
+      }
+      throw new Error('Token verification failed');
     }
   }
 }

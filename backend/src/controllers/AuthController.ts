@@ -9,6 +9,8 @@ interface LoginRequest {
 interface RegisterRequest {
   email: string;
   password: string;
+  firstName: string;
+  lastName: string;
 }
 
 export class AuthController {
@@ -48,13 +50,13 @@ export class AuthController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const { email, password } = req.body as RegisterRequest;
+      const { email, password, firstName, lastName } = req.body as RegisterRequest;
 
-      if (!email || !password) {
-        res.status(400).json({ error: 'Email and password are required' });
+      if (!email || !password || !firstName || !lastName) {
+        res.status(400).json({ error: 'Email, password, first name, and last name are required' });
         return;
       }
-      const result = await this.authService.register(email, password);
+      const result = await this.authService.register(email, password, firstName, lastName);
 
       res.status(201).json({
         message: 'Registration successful',
@@ -78,7 +80,6 @@ export class AuthController {
         message: 'Token is valid',
         user: {
           id: user.userId,
-          email: user.email,
         },
       });
     } catch (error) {
