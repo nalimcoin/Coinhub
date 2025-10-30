@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:15-alpine
+    container_name: coinhub-db
+    restart: always
+    env_file:
+      - ./backend/.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - coinhub-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: coinhub-backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - database
+    networks:
+      - coinhub-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: coinhub-frontend
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - ./frontend/.env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    networks:
+      - coinhub-network
+
+volumes:
+  postgres_data:
+
+networks:
+  coinhub-network:
+    driver: bridge
