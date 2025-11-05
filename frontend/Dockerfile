@@ -1,18 +1,32 @@
-FROM node:18-alpine
+FROM node:18-alpine AS base
 
+FROM base AS deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npm run build
+
+FROM base AS runner
 WORKDIR /app
 
-# Copie des fichiers de dépendances
-COPY package*.json ./
+ENV NODE_ENV=production
 
-# Installation des dépendances
-RUN npm install
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-# Copie du code source
-COPY . .
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Exposition du port
+USER nextjs
+
 EXPOSE 3000
 
-# Commande de démarrage en mode dev
-CMD ["npm", "run", "dev"]
+ENV PORT=3000
+
+CMD ["node", "server.js"]
