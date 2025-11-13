@@ -5,15 +5,19 @@ import * as dotenv from 'dotenv';
 import { Pool } from 'pg';
 import { DatabaseConfig } from './config/DatabaseConfig';
 import { UserRepository } from './repositories/UserRepository';
+import { AccountRepository } from './repositories/AccountRepository';
 import { JwtService } from './services/JwtService';
 import { AuthService } from './services/AuthService';
+import { AccountService } from './services/AccountService';
 import { AuthController } from './controllers/AuthController';
 import { UserController } from './controllers/UserController';
+import { AccountController } from './controllers/AccountController';
 import { AuthMiddleware } from './middlewares/AuthMiddleware';
 import { ErrorMiddleware } from './middlewares/ErrorMiddleware';
 import { SanitizationMiddleware } from './middlewares/SanitizationMiddleware';
 import { AuthRoutes } from './routes/AuthRoutes';
 import { UserRoutes } from './routes/UserRoutes';
+import { AccountRoutes } from './routes/AccountRoutes';
 
 export class App {
   private app: Application;
@@ -77,20 +81,25 @@ export class App {
     });
 
     const userRepository = new UserRepository(this.pool);
+    const accountRepository = new AccountRepository(this.pool);
     const jwtService = new JwtService(
       process.env.JWT_SECRET || '',
       process.env.JWT_EXPIRATION || '1h'
     );
     const authService = new AuthService(userRepository, jwtService);
+    const accountService = new AccountService(accountRepository);
     const authController = new AuthController(authService);
     const userController = new UserController(userRepository);
+    const accountController = new AccountController(accountService);
     const authMiddleware = new AuthMiddleware(jwtService);
 
     const authRoutes = new AuthRoutes(authController, authMiddleware);
     const userRoutes = new UserRoutes(userController, authMiddleware);
+    const accountRoutes = new AccountRoutes(accountController, authMiddleware);
 
     this.app.use('/api/auth', authRoutes.getRouter());
     this.app.use('/api/users', userRoutes.getRouter());
+    this.app.use('/api/accounts', accountRoutes.getRouter());
   }
 
   private configureErrorHandling(): void {
