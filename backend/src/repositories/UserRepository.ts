@@ -14,7 +14,7 @@ export class UserRepository {
     const client: PoolClient = await this.pool.connect();
 
     try {
-      const query = 'SELECT id, email, password_hash, first_name, last_name, created_at FROM users WHERE email = $1';
+      const query = 'SELECT user_id, email, password, first_name, last_name, creation_date FROM users WHERE email = $1';
       const result = await client.query(query, [email.getValue()]);
 
       if (result.rows.length === 0) {
@@ -23,15 +23,15 @@ export class UserRepository {
 
       const row = result.rows[0];
       const userEmail = new Email(row.email);
-      const userPassword = Password.createFromHash(row.password_hash);
+      const userPassword = Password.createFromHash(row.password);
 
       return new User(
-        row.id,
+        row.user_id,
         userEmail,
         userPassword,
         row.first_name,
         row.last_name,
-        new Date(row.created_at)
+        new Date(row.creation_date)
       );
     } finally {
       client.release();
@@ -50,9 +50,9 @@ export class UserRepository {
       }
 
       const query = `
-        INSERT INTO users (email, password_hash, first_name, last_name, created_at)
-        VALUES ($1, $2, $3, $4, NOW())
-        RETURNING id, email, password_hash, first_name, last_name, created_at
+        INSERT INTO users (email, password, first_name, last_name)
+        VALUES ($1, $2, $3, $4)
+        RETURNING user_id, email, password, first_name, last_name, creation_date
       `;
 
       const result = await client.query(query, [
@@ -67,12 +67,12 @@ export class UserRepository {
       const row = result.rows[0];
 
       return new User(
-        row.id,
+        row.user_id,
         email,
         password,
         row.first_name,
         row.last_name,
-        new Date(row.created_at)
+        new Date(row.creation_date)
       );
     } catch (error) {
       await client.query('ROLLBACK');
@@ -86,7 +86,7 @@ export class UserRepository {
     const client: PoolClient = await this.pool.connect();
 
     try {
-      const query = 'SELECT id, email, password_hash, first_name, last_name, created_at FROM users WHERE id = $1';
+      const query = 'SELECT user_id, email, password, first_name, last_name, creation_date FROM users WHERE user_id = $1';
       const result = await client.query(query, [id]);
 
       if (result.rows.length === 0) {
@@ -96,15 +96,15 @@ export class UserRepository {
       const row = result.rows[0];
 
       const userEmail = new Email(row.email);
-      const userPassword = Password.createFromHash(row.password_hash);
+      const userPassword = Password.createFromHash(row.password);
 
       return new User(
-        row.id,
+        row.user_id,
         userEmail,
         userPassword,
         row.first_name,
         row.last_name,
-        new Date(row.created_at)
+        new Date(row.creation_date)
       );
     } finally {
       client.release();
@@ -115,20 +115,20 @@ export class UserRepository {
     const client: PoolClient = await this.pool.connect();
 
     try {
-      const query = 'SELECT id, email, password_hash, first_name, last_name, created_at FROM users ORDER BY created_at DESC';
+      const query = 'SELECT user_id, email, password, first_name, last_name, creation_date FROM users ORDER BY creation_date DESC';
       const result = await client.query(query);
 
       return result.rows.map(row => {
         const userEmail = new Email(row.email);
-        const userPassword = Password.createFromHash(row.password_hash);
+        const userPassword = Password.createFromHash(row.password);
 
         return new User(
-          row.id,
+          row.user_id,
           userEmail,
           userPassword,
           row.first_name,
           row.last_name,
-          new Date(row.created_at)
+          new Date(row.creation_date)
         );
       });
     } finally {
@@ -164,7 +164,7 @@ export class UserRepository {
       }
 
       if (data.password) {
-        updates.push(`password_hash = $${paramIndex++}`);
+        updates.push(`password = $${paramIndex++}`);
         values.push(data.password.getHash());
       }
 
@@ -187,8 +187,8 @@ export class UserRepository {
       const query = `
         UPDATE users
         SET ${updates.join(', ')}
-        WHERE id = $${paramIndex}
-        RETURNING id, email, password_hash, first_name, last_name, created_at
+        WHERE user_id = $${paramIndex}
+        RETURNING user_id, email, password, first_name, last_name, creation_date
       `;
 
       const result = await client.query(query, values);
@@ -196,15 +196,15 @@ export class UserRepository {
 
       const row = result.rows[0];
       const userEmail = new Email(row.email);
-      const userPassword = Password.createFromHash(row.password_hash);
+      const userPassword = Password.createFromHash(row.password);
 
       return new User(
-        row.id,
+        row.user_id,
         userEmail,
         userPassword,
         row.first_name,
         row.last_name,
-        new Date(row.created_at)
+        new Date(row.creation_date)
       );
     } catch (error) {
       await client.query('ROLLBACK');
@@ -225,7 +225,7 @@ export class UserRepository {
         throw new Error('User not found');
       }
 
-      const query = 'DELETE FROM users WHERE id = $1';
+      const query = 'DELETE FROM users WHERE user_id = $1';
       await client.query(query, [id]);
 
       await client.query('COMMIT');

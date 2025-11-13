@@ -1,4 +1,9 @@
-import { App } from './App';
+import { webcrypto } from 'crypto';
+import { App } from './App.js';
+
+if (!globalThis.crypto) {
+  globalThis.crypto = webcrypto as any;
+}
 
 const app = new App();
 

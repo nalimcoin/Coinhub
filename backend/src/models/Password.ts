@@ -11,12 +11,7 @@ export class Password {
   public static async createFromPlainText(plainPassword: string): Promise<Password> {
     Password.validate(plainPassword);
 
-    const hashedPassword = await argon2.hash(plainPassword, {
-      type: argon2.argon2id,
-      memoryCost: 65536,
-      timeCost: 3,
-      parallelism: 4,
-    });
+    const hashedPassword = await argon2.hash(plainPassword);
 
     return new Password(hashedPassword);
   }
