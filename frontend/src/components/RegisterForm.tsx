@@ -119,9 +119,9 @@ export default function RegisterForm() {
                 placeholder=""
                 required
                 disabled={isLoading}
-                minLength={6}
+                minLength={8}
               />
-              <p className="text-xs mt-1 text-black">Minimum 6 caractères</p>
+              <p className="text-xs mt-1 text-black">Minimum 8 caractères</p>
             </div>
 
             <button

@@ -1,6 +1,6 @@
 'use client';
 
-import Layout from '@/src/components/Layout';
+import Layout from '../../components/Layout';
 
 export default function DashboardPage() {
   return (

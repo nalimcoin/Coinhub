@@ -12,11 +12,6 @@ export class AuthService {
   }
 
   async login(credentials: LoginCredentials): Promise<User> {
-    if (!credentials.isValid()) {
-      const errors = credentials.getValidationErrors();
-      throw new Error(errors.join(', '));
-    }
-
     try {
       const response = await fetch(`${this.apiUrl}/auth/login`, {
         method: 'POST',
