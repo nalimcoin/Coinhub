@@ -1,0 +1,10 @@
+{
+  "extends": "./backend/tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "types": ["jest", "node"],
+    "skipLibCheck": true,
+    "strict": false
+  },
+  "include": ["tests/**/*", "backend/src/**/*"]
+}
