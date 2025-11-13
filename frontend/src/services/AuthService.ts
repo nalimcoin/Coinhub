@@ -62,11 +62,6 @@ export class AuthService {
   }
 
   async register(credentials: RegisterCredentials): Promise<User> {
-    if (!credentials.isValid()) {
-      const errors = credentials.getValidationErrors();
-      throw new Error(errors.join(', '));
-    }
-
     try {
       const response = await fetch(`${this.apiUrl}/auth/register`, {
         method: 'POST',
