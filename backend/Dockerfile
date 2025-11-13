@@ -1,19 +1,15 @@
 FROM node:18-alpine
 
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
 
-# Copie des fichiers de dépendances
 COPY package*.json ./
-COPY tsconfig.json ./
 
-# Installation des dépendances
-RUN npm install
+RUN npm ci
 
-# Copie du code source
 COPY . .
 
-# Exposition du port
 EXPOSE 3001
 
-# Commande de démarrage en mode dev
-CMD ["npm", "run", "dev"]
+CMD ["npx", "tsx", "src/server.ts"]
