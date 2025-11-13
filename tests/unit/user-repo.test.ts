@@ -31,12 +31,12 @@ describe('UserRepository', () => {
     it('devrait retourner un utilisateur quand l\'email existe', async () => {
       const email = new Email('test@example.com');
       const mockRow = {
-        id: 1,
+        user_id: 1,
         email: 'test@example.com',
-        password_hash: '$2b$10$hashedpassword',
+        password: '$2b$10$hashedpassword',
         first_name: 'John',
         last_name: 'Doe',
-        created_at: new Date('2024-01-01'),
+        creation_date: new Date('2024-01-01'),
       };
 
       mockClient.query.mockResolvedValueOnce({
@@ -53,7 +53,7 @@ describe('UserRepository', () => {
       expect(result?.getId()).toBe(1);
       expect(result?.getEmail().getValue()).toBe('test@example.com');
       expect(mockClient.query).toHaveBeenCalledWith(
-        'SELECT id, email, password_hash, first_name, last_name, created_at FROM users WHERE email = $1',
+        'SELECT user_id, email, password, first_name, last_name, creation_date FROM users WHERE email = $1',
         ['test@example.com']
       );
       expect(mockClient.release).toHaveBeenCalled();
@@ -79,12 +79,12 @@ describe('UserRepository', () => {
   describe('findById', () => {
     it('devrait retourner un utilisateur quand l\'id existe', async () => {
       const mockRow = {
-        id: 1,
+        user_id: 1,
         email: 'test@example.com',
-        password_hash: '$2b$10$hashedpassword',
+        password: '$2b$10$hashedpassword',
         first_name: 'John',
         last_name: 'Doe',
-        created_at: new Date('2024-01-01'),
+        creation_date: new Date('2024-01-01'),
       };
 
       mockClient.query.mockResolvedValueOnce({
@@ -100,7 +100,7 @@ describe('UserRepository', () => {
       expect(result).toBeInstanceOf(User);
       expect(result?.getId()).toBe(1);
       expect(mockClient.query).toHaveBeenCalledWith(
-        'SELECT id, email, password_hash, first_name, last_name, created_at FROM users WHERE id = $1',
+        'SELECT user_id, email, password, first_name, last_name, creation_date FROM users WHERE user_id = $1',
         [1]
       );
       expect(mockClient.release).toHaveBeenCalled();
@@ -126,20 +126,20 @@ describe('UserRepository', () => {
     it('devrait retourner tous les utilisateurs', async () => {
       const mockRows = [
         {
-          id: 1,
+          user_id: 1,
           email: 'user1@example.com',
-          password_hash: '$2b$10$hash1',
+          password: '$2b$10$hash1',
           first_name: 'John',
           last_name: 'Doe',
-          created_at: new Date('2024-01-01'),
+          creation_date: new Date('2024-01-01'),
         },
         {
-          id: 2,
+          user_id: 2,
           email: 'user2@example.com',
-          password_hash: '$2b$10$hash2',
+          password: '$2b$10$hash2',
           first_name: 'Jane',
           last_name: 'Smith',
-          created_at: new Date('2024-01-02'),
+          creation_date: new Date('2024-01-02'),
         },
       ];
 
@@ -158,7 +158,7 @@ describe('UserRepository', () => {
       expect(result[0].getId()).toBe(1);
       expect(result[1].getId()).toBe(2);
       expect(mockClient.query).toHaveBeenCalledWith(
-        'SELECT id, email, password_hash, first_name, last_name, created_at FROM users ORDER BY created_at DESC'
+        'SELECT user_id, email, password, first_name, last_name, creation_date FROM users ORDER BY creation_date DESC'
       );
       expect(mockClient.release).toHaveBeenCalled();
     });
@@ -184,19 +184,19 @@ describe('UserRepository', () => {
       const email = new Email('newuser@example.com');
       const password = await Password.createFromPlainText('Password123!');
       const mockRow = {
-        id: 1,
+        user_id: 1,
         email: 'newuser@example.com',
-        password_hash: password.getHash(),
+        password: password.getHash(),
         first_name: 'New',
         last_name: 'User',
-        created_at: new Date('2024-01-01'),
+        creation_date: new Date('2024-01-01'),
       };
 
       mockClient.query
         .mockResolvedValueOnce({ rows: [], command: 'SELECT', rowCount: 0, oid: 0, fields: [] } as any)
-        .mockResolvedValueOnce({ command: 'BEGIN', rowCount: 0, oid: 0, fields: [], rows: [] } as any) 
-        .mockResolvedValueOnce({ rows: [mockRow], command: 'INSERT', rowCount: 1, oid: 0, fields: [] } as any) 
-        .mockResolvedValueOnce({ command: 'COMMIT', rowCount: 0, oid: 0, fields: [], rows: [] } as any); 
+        .mockResolvedValueOnce({ command: 'BEGIN', rowCount: 0, oid: 0, fields: [], rows: [] } as any)
+        .mockResolvedValueOnce({ rows: [mockRow], command: 'INSERT', rowCount: 1, oid: 0, fields: [] } as any)
+        .mockResolvedValueOnce({ command: 'COMMIT', rowCount: 0, oid: 0, fields: [], rows: [] } as any);
 
       const result = await userRepository.create(email, password, 'New', 'User');
 
@@ -213,22 +213,22 @@ describe('UserRepository', () => {
       const password = await Password.createFromPlainText('Password123!');
 
       mockClient.query
-        .mockResolvedValueOnce({ command: 'BEGIN', rowCount: 0, oid: 0, fields: [], rows: [] } as any) 
+        .mockResolvedValueOnce({ command: 'BEGIN', rowCount: 0, oid: 0, fields: [], rows: [] } as any)
         .mockResolvedValueOnce({
           rows: [{
-            id: 1,
+            user_id: 1,
             email: 'existing@example.com',
-            password_hash: password.getHash(),
+            password: password.getHash(),
             first_name: 'Existing',
             last_name: 'User',
-            created_at: new Date(),
+            creation_date: new Date(),
           }],
           command: 'SELECT',
           rowCount: 1,
           oid: 0,
           fields: [],
         } as any)
-        .mockResolvedValueOnce({ command: 'ROLLBACK', rowCount: 0, oid: 0, fields: [], rows: [] } as any); // ROLLBACK
+        .mockResolvedValueOnce({ command: 'ROLLBACK', rowCount: 0, oid: 0, fields: [], rows: [] } as any);
 
       await expect(
         userRepository.create(email, password, 'New', 'User')
@@ -243,20 +243,20 @@ describe('UserRepository', () => {
     it('devrait mettre à jour un utilisateur avec succès', async () => {
       const newEmail = new Email('updated@example.com');
       const mockExistingRow = {
-        id: 1,
+        user_id: 1,
         email: 'old@example.com',
-        password_hash: '$2b$10$oldhash',
+        password: '$2b$10$oldhash',
         first_name: 'Old',
         last_name: 'Name',
-        created_at: new Date('2024-01-01'),
+        creation_date: new Date('2024-01-01'),
       };
       const mockUpdatedRow = {
-        id: 1,
+        user_id: 1,
         email: 'updated@example.com',
-        password_hash: '$2b$10$oldhash',
+        password: '$2b$10$oldhash',
         first_name: 'Updated',
         last_name: 'Name',
-        created_at: new Date('2024-01-01'),
+        creation_date: new Date('2024-01-01'),
       };
 
       mockClient.query
@@ -293,23 +293,23 @@ describe('UserRepository', () => {
   describe('delete', () => {
     it('devrait supprimer un utilisateur avec succès', async () => {
       const mockRow = {
-        id: 1,
+        user_id: 1,
         email: 'test@example.com',
-        password_hash: '$2b$10$hash',
+        password: '$2b$10$hash',
         first_name: 'User',
         last_name: 'Name',
-        created_at: new Date('2024-01-01'),
+        creation_date: new Date('2024-01-01'),
       };
 
       mockClient.query
-        .mockResolvedValueOnce({ command: 'BEGIN', rowCount: 0, oid: 0, fields: [], rows: [] } as any) 
-        .mockResolvedValueOnce({ rows: [mockRow], command: 'SELECT', rowCount: 1, oid: 0, fields: [] } as any) 
-        .mockResolvedValueOnce({ command: 'DELETE', rowCount: 1, oid: 0, fields: [], rows: [] } as any) 
+        .mockResolvedValueOnce({ command: 'BEGIN', rowCount: 0, oid: 0, fields: [], rows: [] } as any)
+        .mockResolvedValueOnce({ rows: [mockRow], command: 'SELECT', rowCount: 1, oid: 0, fields: [] } as any)
+        .mockResolvedValueOnce({ command: 'DELETE', rowCount: 1, oid: 0, fields: [], rows: [] } as any)
         .mockResolvedValueOnce({ command: 'COMMIT', rowCount: 0, oid: 0, fields: [], rows: [] } as any);
 
       await userRepository.delete(1);
 
-      expect(mockClient.query).toHaveBeenCalledWith('DELETE FROM users WHERE id = $1', [1]);
+      expect(mockClient.query).toHaveBeenCalledWith('DELETE FROM users WHERE user_id = $1', [1]);
       expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
       expect(mockClient.release).toHaveBeenCalled();
     });
