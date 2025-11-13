@@ -72,7 +72,7 @@ describe('Page de connexion', () => {
       cy.intercept('POST', '**/login', {
         statusCode: 401,
         body: {
-          message: 'Email ou mot de passe incorrect'
+          message: 'Échec de la connexion',
         }
       }).as('loginRequest');
 
@@ -83,7 +83,7 @@ describe('Page de connexion', () => {
       cy.wait('@loginRequest');
 
       cy.get('.bg-red-100').should('be.visible');
-      cy.contains('Email ou mot de passe incorrect').should('be.visible');
+      cy.contains('Échec de la connexion').should('be.visible');
     });
 
     it('devrait rediriger vers le dashboard après une connexion réussie', () => {
