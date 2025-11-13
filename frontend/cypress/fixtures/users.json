@@ -1,0 +1,44 @@
+{
+  "validUser": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "password": "password123"
+  },
+  "existingUser": {
+    "email": "existing@example.com",
+    "password": "password123"
+  },
+  "invalidEmail": {
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "email": "invalid-email",
+    "password": "password123"
+  },
+  "shortPassword": {
+    "firstName": "Bob",
+    "lastName": "Johnson",
+    "email": "bob.johnson@example.com",
+    "password": "12345"
+  },
+  "apiResponse": {
+    "success": {
+      "user": {
+        "id": 1,
+        "email": "john.doe@example.com",
+        "firstName": "John",
+        "lastName": "Doe"
+      },
+      "token": "fake-jwt-token-abc123xyz789"
+    },
+    "emailExists": {
+      "message": "Cet email est déjà utilisé"
+    },
+    "invalidCredentials": {
+      "message": "Email ou mot de passe incorrect"
+    },
+    "serverError": {
+      "message": "Une erreur est survenue"
+    }
+  }
+}
