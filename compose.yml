@@ -23,28 +23,37 @@ services:
       - ./backend/.env
     ports:
       - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
     depends_on:
       - database
     networks:
       - coinhub-network
     restart: unless-stopped
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: coinhub-frontend
-    environment:
-      - NODE_ENV=development
-    env_file:
-      - ./frontend/.env
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-    networks:
-      - coinhub-network
-    restart: unless-stopped
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: coinhub-frontend
+  #   environment:
+  #     - NODE_ENV=development
+  #     - WATCHPACK_POLLING=true
+  #     - CHOKIDAR_USEPOLLING=true
+  #   env_file:
+  #     - ./frontend/.env
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #     - /app/.next
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - coinhub-network
+  #   restart: unless-stopped
 
 volumes:
   postgres_data:
