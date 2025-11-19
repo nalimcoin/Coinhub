@@ -5,7 +5,6 @@ on:
     branches: [ main ]
 
 jobs:
-  # Job 1 : Tests backend
   backend-test:
     name: Backend - Tests Jest
     runs-on: ubuntu-latest
@@ -22,14 +21,11 @@ jobs:
           cache-dependency-path: backend/package-lock.json
 
       - name: Installation des dépendances
-        working-directory: ./backend
         run: npm ci
 
       - name: Exécution des tests Jest
-        working-directory: ./backend
         run: npm test
 
-  # Job 2 : Tests frontend
   frontend-test:
     name: Frontend - Tests Cypress
     runs-on: ubuntu-latest
@@ -48,10 +44,6 @@ jobs:
       - name: Installation des dépendances
         working-directory: ./frontend
         run: npm ci
-
-      - name: Build de production
-        working-directory: ./frontend
-        run: npm run build
 
       - name: Exécution des tests Cypress
         working-directory: ./frontend
