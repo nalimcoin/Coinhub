@@ -21,9 +21,11 @@ jobs:
           cache-dependency-path: backend/package-lock.json
 
       - name: Installation des dépendances
+        working-directory: ./backend
         run: npm ci
 
       - name: Exécution des tests Jest
+        working-directory: ./backend
         run: npm test
 
   frontend-test:

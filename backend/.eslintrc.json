@@ -12,8 +12,8 @@
   "rules": {
     "no-console": "warn",
     "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": ["error", { 
-      "argsIgnorePattern": "^_" 
+    "@typescript-eslint/no-unused-vars": ["error", {
+      "argsIgnorePattern": "^_"
     }],
     "@typescript-eslint/explicit-function-return-type": "warn",
     "@typescript-eslint/no-explicit-any": "warn",
@@ -26,11 +26,3 @@
     "es2020": true
   }
 }
-```
-
-### 3. Backend - .eslintignore
-```
-node_modules
-dist
-coverage
-*.config.js
