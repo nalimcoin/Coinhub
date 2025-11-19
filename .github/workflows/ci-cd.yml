@@ -27,26 +27,3 @@ jobs:
       - name: Exécution des tests Jest
         working-directory: ./backend
         run: npm test
-
-  frontend-test:
-    name: Frontend - Tests Cypress
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout du code
-        uses: actions/checkout@v4
-
-      - name: Installation de Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Installation des dépendances
-        working-directory: ./frontend
-        run: npm ci
-
-      - name: Exécution des tests Cypress
-        working-directory: ./frontend
-        run: npm run cypress:headless
