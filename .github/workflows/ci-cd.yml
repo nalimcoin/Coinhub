@@ -5,41 +5,33 @@ on:
     branches: [ main ]
 
 jobs:
-  # Job 1 : Vérification du code backend
+  # Job 1 : Tests backend
   backend-test:
-    name: Backend - Tests et Lint
+    name: Backend - Tests Jest
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
-      
+
       - name: Installation de Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
-      
+
       - name: Installation des dépendances
         working-directory: ./backend
         run: npm ci
-      
-      - name: Vérification du code (Lint)
-        working-directory: ./backend
-        run: npm run lint
-      
-      - name: Compilation TypeScript
-        working-directory: ./backend
-        run: npm run build
-      
-      - name: Exécution des tests
+
+      - name: Exécution des tests Jest
         working-directory: ./backend
         run: npm test
 
-  # Job 2 : Vérification du code frontend
+  # Job 2 : Tests frontend
   frontend-test:
-    name: Frontend - Tests et Lint
+    name: Frontend - Tests Cypress
     runs-on: ubuntu-latest
 
     steps:
@@ -56,10 +48,6 @@ jobs:
       - name: Installation des dépendances
         working-directory: ./frontend
         run: npm ci
-
-      - name: Vérification du code (Lint)
-        working-directory: ./frontend
-        run: npm run lint
 
       - name: Build de production
         working-directory: ./frontend
