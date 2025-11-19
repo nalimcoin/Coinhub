@@ -4,11 +4,18 @@ module.exports = {
   roots: ['<rootDir>/../tests'],
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': ['ts-jest', {
+      tsconfig: {
+        moduleResolution: 'node',
+        esModuleInterop: true,
+        resolveJsonModule: true,
+      }
+    }],
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
+  modulePaths: ['<rootDir>'],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.test.ts',
