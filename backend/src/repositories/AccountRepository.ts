@@ -216,4 +216,35 @@ export class AccountRepository {
   public async updateBalance(id: number, newBalance: number): Promise<Account> {
     return this.update(id, { actualBalance: newBalance });
   }
+
+  public async calculateBalance(accountId: number): Promise<number> {
+    const client: PoolClient = await this.pool.connect();
+
+    try {
+      // Get initial balance
+      const accountQuery = 'SELECT initial_balance FROM accounts WHERE account_id = $1';
+      const accountResult = await client.query(accountQuery, [accountId]);
+
+      if (accountResult.rows.length === 0) {
+        throw new Error('Account not found');
+      }
+
+      const initialBalance = accountResult.rows[0].initial_balance;
+
+      // Calculate sum of all transactions
+      const transactionQuery = `
+        SELECT
+          COALESCE(SUM(CASE WHEN is_income = true THEN amount ELSE -amount END), 0) as total
+        FROM transactions
+        WHERE account_id = $1
+      `;
+      const transactionResult = await client.query(transactionQuery, [accountId]);
+
+      const transactionTotal = parseInt(transactionResult.rows[0].total);
+
+      return initialBalance + transactionTotal;
+    } finally {
+      client.release();
+    }
+  }
 }

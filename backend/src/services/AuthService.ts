@@ -1,5 +1,6 @@
 import { UserRepository } from '../repositories/UserRepository';
 import { JwtService } from './JwtService';
+import { DefaultCategoryService } from './DefaultCategoryService';
 import { Email } from '../models/Email';
 import { Password } from '../models/Password';
 import { User } from '../models/User';
@@ -15,10 +16,12 @@ export interface AuthResponse {
 export class AuthService {
   private userRepository: UserRepository;
   private jwtService: JwtService;
+  private defaultCategoryService: DefaultCategoryService;
 
-  constructor(userRepository: UserRepository, jwtService: JwtService) {
+  constructor(userRepository: UserRepository, jwtService: JwtService, defaultCategoryService: DefaultCategoryService) {
     this.userRepository = userRepository;
     this.jwtService = jwtService;
+    this.defaultCategoryService = defaultCategoryService;
   }
 
   public async login(emailStr: string, passwordStr: string): Promise<AuthResponse> {
@@ -55,6 +58,9 @@ export class AuthService {
     const email = new Email(emailStr);
     const password = await Password.createFromPlainText(passwordStr);
     const user = await this.userRepository.create(email, password, firstName, lastName);
+
+    await this.defaultCategoryService.createDefaultCategoriesForUser(user.getId());
+
     const accessToken = await this.jwtService.generateToken(user);
 
     return {

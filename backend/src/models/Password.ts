@@ -28,8 +28,8 @@ export class Password {
       throw new Error('Password cannot be empty');
     }
 
-    if (plainPassword.length < 8) {
-      throw new Error('Password must be at least 8 characters long');
+    if (plainPassword.length < 12) {
+      throw new Error('Password must be at least 12 characters long');
     }
 
     if (plainPassword.length > 128) {

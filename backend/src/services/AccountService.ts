@@ -58,4 +58,13 @@ export class AccountService {
   public async updateBalance(accountId: number, newBalance: number): Promise<Account> {
     return this.accountRepository.updateBalance(accountId, newBalance);
   }
+
+  public async calculateAndUpdateBalance(accountId: number): Promise<Account> {
+    const calculatedBalance = await this.accountRepository.calculateBalance(accountId);
+    return this.accountRepository.updateBalance(accountId, calculatedBalance);
+  }
+
+  public async calculateBalance(accountId: number): Promise<number> {
+    return this.accountRepository.calculateBalance(accountId);
+  }
 }
