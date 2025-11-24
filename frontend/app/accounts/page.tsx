@@ -5,7 +5,11 @@ import { useRouter } from 'next/navigation';
 import Layout from '@/src/components/Layout';
 import CreateAccountModal from '@/src/components/CreateAccountModal';
 import { AccountService } from '@/src/services/AccountService';
+import { TransactionService } from '@/src/services/TransactionService';
+import { CategoryService } from '@/src/services/CategoryService';
 import { Account } from '@/src/models/Account';
+import { Transaction } from '@/src/models/Transaction';
+import { Category } from '@/src/models/Category';
 import { getUserIdFromToken } from '@/src/utils/jwt';
 
 export default function AccountsPage() {
@@ -14,8 +18,11 @@ export default function AccountsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [lastTransactions, setLastTransactions] = useState<Map<number, { transaction: Transaction; category: Category }>>(new Map());
 
   const accountService = new AccountService();
+  const transactionService = new TransactionService();
+  const categoryService = new CategoryService();
 
   const loadAccounts = async () => {
     try {
@@ -30,6 +37,31 @@ export default function AccountsPage() {
 
       const fetchedAccounts = await accountService.getAccountsByUserId(userId);
       setAccounts(fetchedAccounts);
+
+      // Load last transaction for each account
+      const categories = await categoryService.getAllCategories();
+      const categoryMap = new Map<number, Category>();
+      categories.forEach(cat => categoryMap.set(cat.getId(), cat));
+
+      const transactionsMap = new Map<number, { transaction: Transaction; category: Category }>();
+
+      for (const account of fetchedAccounts) {
+        try {
+          const transactions = await transactionService.getTransactionsByAccountId(account.getId());
+          if (transactions.length > 0) {
+            const lastTransaction = transactions[0]; // Already sorted by date DESC
+            const category = categoryMap.get(lastTransaction.getCategoryId());
+            if (category) {
+              transactionsMap.set(account.getId(), { transaction: lastTransaction, category });
+            }
+          }
+        } catch (err) {
+          // If there's an error loading transactions for one account, continue with others
+          console.error(`Failed to load transactions for account ${account.getId()}:`, err);
+        }
+      }
+
+      setLastTransactions(transactionsMap);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -96,12 +128,16 @@ export default function AccountsPage() {
             {accounts.map((account) => (
               <div
                 key={account.getId()}
-                className="bg-white rounded-lg border-2 border-black p-6 hover:shadow-lg transition-shadow"
+                onClick={() => router.push(`/accounts/${account.getId()}`)}
+                className="bg-white rounded-lg border-2 border-black p-6 hover:shadow-lg transition-shadow cursor-pointer"
               >
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-xl font-bold text-black">{account.getName()}</h3>
                   <button
-                    onClick={() => handleDeleteAccount(account.getId())}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteAccount(account.getId());
+                    }}
                     className="text-red-600 hover:text-red-800 font-bold"
                   >
                     🗑️
@@ -130,8 +166,36 @@ export default function AccountsPage() {
                 </div>
 
                 <div className="mt-6 pt-4 border-t-2 border-gray-200">
-                  <p className="text-sm text-gray-600 mb-2">Dernières transactions</p>
-                  <p className="text-sm text-gray-400 italic">Aucune transaction pour le moment</p>
+                  <p className="text-sm text-gray-600 mb-2">Dernière transaction</p>
+                  {lastTransactions.has(account.getId()) ? (
+                    (() => {
+                      const { transaction, category } = lastTransactions.get(account.getId())!;
+                      return (
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-6 h-6 rounded-full border border-black flex-shrink-0"
+                            style={{ backgroundColor: category.getColor() }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-black truncate">
+                              {category.getName()}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {transaction.getDate().toLocaleDateString('fr-FR')}
+                            </p>
+                          </div>
+                          <p className={`text-sm font-bold ${
+                            transaction.isIncomeTransaction() ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {transaction.isIncomeTransaction() ? '+' : '-'}
+                            {transaction.getFormattedAmount(account.getCurrency())}
+                          </p>
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    <p className="text-sm text-gray-400 italic">Aucune transaction pour le moment</p>
+                  )}
                 </div>
               </div>
             ))}
