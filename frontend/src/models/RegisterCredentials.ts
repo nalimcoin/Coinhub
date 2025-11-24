@@ -35,7 +35,7 @@ export class RegisterCredentials implements IRegisterCredentials {
   }
 
   isPasswordValid(): boolean {
-    return this._password.length >= 6;
+    return this._password.length >= 12;
   }
 
   isFirstNameValid(): boolean {
@@ -63,7 +63,7 @@ export class RegisterCredentials implements IRegisterCredentials {
     }
 
     if (!this.isPasswordValid()) {
-      errors.push('Le mot de passe doit contenir au moins 6 caractères');
+      errors.push('Le mot de passe doit contenir au moins 12 caractères');
     }
 
     if (!this.isFirstNameValid()) {

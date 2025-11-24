@@ -14,6 +14,7 @@ export default function Sidebar() {
   const menuItems = [
     { name: 'Accueil', icon: '🏠', path: '/dashboard' },
     { name: 'Comptes', icon: '💳', path: '/accounts' },
+    { name: 'Catégories', icon: '🏷️', path: '/categories' },
     { name: 'Transactions', icon: '📊', path: '/transactions' },
     { name: 'Paramètres', icon: '⚙️', path: '/settings' },
   ];
