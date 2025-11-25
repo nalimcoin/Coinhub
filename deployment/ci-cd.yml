@@ -1,0 +1,50 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Production Server
+    runs-on: ubuntu-latest
+
+    env:
+      BACKEND_FOLDER: ${{ secrets.BACKEND_FOLDER }}
+      FRONTEND_FOLDER: ${{ secrets.FRONTEND_FOLDER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      NODE_ENV: ${{ secrets.NODE_ENV }}
+      DEPLOY_DIR: ${{ secrets.DEPLOY_DIR }}
+      REPO_URL: ${{ github.repository }}
+
+    steps:
+      - name: Deploy to Server 
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          script: |
+            set -e
+            
+            export BACKEND_FOLDER=${BACKEND_FOLDER}
+            export FRONTEND_FOLDER=${FRONTEND_FOLDER}
+            export DB_PASSWORD=${DB_PASSWORD}
+            export NODE_ENV=${NODE_ENV}
+            export DEPLOY_DIR=${DEPLOY_DIR}
+            export REPO_URL="git@github.com:${REPO_URL}.git"
+
+            mkdir -p $DEPLOY_DIR
+            cd $DEPLOY_DIR
+
+            if [ ! -d ".git" ]; then
+              git clone $REPO_URL .
+            else
+              git pull origin main
+            fi
+
+            docker-compose down
+            docker image prune -f
+            docker-compose up -d --build
