@@ -9,7 +9,7 @@ export class JwtService {
   private readonly secret: Uint8Array;
   private readonly expiresIn: string;
 
-  constructor(secret: string, expiresIn: string = '1h') {
+  constructor(secret: string, expiresIn: string = '15m') {
     if (!secret || secret.length < 32) {
       throw new Error('JWT secret must be at least 32 characters long');
     }

@@ -51,7 +51,7 @@ export class CategoryService {
     const isUsed = await this.categoryRepository.isUsedInTransactions(categoryId);
 
     if (isUsed) {
-      throw new Error('Cannot delete category that is used in transactions');
+      throw new Error('Cette catégorie est actuellement utilisée par une transaction');
     }
 
     return this.categoryRepository.delete(categoryId);

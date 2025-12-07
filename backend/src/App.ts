@@ -65,7 +65,7 @@ export class App {
     this.app.use(
       cors({
         origin: frontendUrl,
-        credentials: true,
+        credentials: false,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
         maxAge: 600,
@@ -94,8 +94,7 @@ export class App {
     const categoryRepository = new CategoryRepository(this.pool);
     const transactionRepository = new TransactionRepository(this.pool);
     const jwtService = new JwtService(
-      process.env.JWT_SECRET || '',
-      process.env.JWT_EXPIRATION || '1h'
+      process.env.JWT_SECRET || ''
     );
     const defaultCategoryService = new DefaultCategoryService(categoryRepository);
     const authService = new AuthService(userRepository, jwtService, defaultCategoryService);
