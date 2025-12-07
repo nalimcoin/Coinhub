@@ -1,4 +1,9 @@
-export function decodeJWT(token: string): any {
+interface JWTPayload {
+  userId?: number;
+  [key: string]: unknown;
+}
+
+export function decodeJWT(token: string): JWTPayload | null {
   try {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -8,8 +13,8 @@ export function decodeJWT(token: string): any {
         .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
         .join('')
     );
-    return JSON.parse(jsonPayload);
-  } catch (error) {
+    return JSON.parse(jsonPayload) as JWTPayload;
+  } catch {
     return null;
   }
 }

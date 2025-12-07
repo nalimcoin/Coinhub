@@ -88,7 +88,7 @@ export default function AccountsPage() {
           </div>
         ) : accounts.length === 0 ? (
           <div className="bg-white rounded-lg border-2 border-black p-12 text-center">
-            <p className="text-xl text-gray-600 mb-4">Vous n'avez pas encore de compte bancaire</p>
+            <p className="text-xl text-gray-600 mb-4">Vous n&apos;avez pas encore de compte bancaire</p>
             <p className="text-gray-500">Créez votre premier compte pour commencer à gérer votre budget</p>
           </div>
         ) : (

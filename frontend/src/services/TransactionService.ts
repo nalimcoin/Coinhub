@@ -1,4 +1,5 @@
 import { Transaction, ITransaction } from '../models/Transaction';
+import { AuthService } from './AuthService';
 
 interface CreateTransactionData {
   isIncome: boolean;
@@ -19,9 +20,11 @@ interface UpdateTransactionData {
 
 export class TransactionService {
   private readonly apiUrl: string;
+  private authService: AuthService;
 
-  constructor(apiUrl: string = 'http://localhost:3001/api') {
+  constructor(apiUrl: string = 'http://localhost:3001/api', authService?: AuthService) {
     this.apiUrl = apiUrl;
+    this.authService = authService || new AuthService(apiUrl);
   }
 
   private getAuthHeader(): Record<string, string> {
@@ -34,6 +37,12 @@ export class TransactionService {
     return {};
   }
 
+  private handleResponse(response: Response): void {
+    if (response.status === 401) {
+      this.authService.handleUnauthorized();
+    }
+  }
+
   async createTransaction(data: CreateTransactionData): Promise<Transaction> {
     try {
       const response = await fetch(`${this.apiUrl}/transactions`, {
@@ -44,6 +53,8 @@ export class TransactionService {
         },
         body: JSON.stringify(data),
       });
+
+      this.handleResponse(response);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -70,6 +81,8 @@ export class TransactionService {
         },
       });
 
+      this.handleResponse(response);
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to fetch transactions');
@@ -94,6 +107,8 @@ export class TransactionService {
           ...this.getAuthHeader(),
         },
       });
+
+      this.handleResponse(response);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -121,6 +136,8 @@ export class TransactionService {
         body: JSON.stringify(data),
       });
 
+      this.handleResponse(response);
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to update transaction');
@@ -145,6 +162,8 @@ export class TransactionService {
           ...this.getAuthHeader(),
         },
       });
+
+      this.handleResponse(response);
 
       if (!response.ok) {
         const errorData = await response.json();

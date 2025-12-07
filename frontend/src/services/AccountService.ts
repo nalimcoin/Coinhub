@@ -1,4 +1,5 @@
 import { Account, IAccount } from '../models/Account';
+import { AuthService } from './AuthService';
 
 interface CreateAccountData {
   name: string;
@@ -15,9 +16,11 @@ interface UpdateAccountData {
 
 export class AccountService {
   private readonly apiUrl: string;
+  private authService: AuthService;
 
-  constructor(apiUrl: string = 'http://localhost:3001/api') {
+  constructor(apiUrl: string = 'http://localhost:3001/api', authService?: AuthService) {
     this.apiUrl = apiUrl;
+    this.authService = authService || new AuthService(apiUrl);
   }
 
   private getAuthHeader(): Record<string, string> {
@@ -30,6 +33,12 @@ export class AccountService {
     return {};
   }
 
+  private handleResponse(response: Response): void {
+    if (response.status === 401) {
+      this.authService.handleUnauthorized();
+    }
+  }
+
   async createAccount(data: CreateAccountData): Promise<Account> {
     try {
       const response = await fetch(`${this.apiUrl}/accounts`, {
@@ -40,6 +49,8 @@ export class AccountService {
         },
         body: JSON.stringify(data),
       });
+
+      this.handleResponse(response);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -66,6 +77,8 @@ export class AccountService {
         },
       });
 
+      this.handleResponse(response);
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to fetch accounts');
@@ -90,6 +103,8 @@ export class AccountService {
           ...this.getAuthHeader(),
         },
       });
+
+      this.handleResponse(response);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -117,6 +132,8 @@ export class AccountService {
         body: JSON.stringify(data),
       });
 
+      this.handleResponse(response);
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to update account');
@@ -141,6 +158,8 @@ export class AccountService {
           ...this.getAuthHeader(),
         },
       });
+
+      this.handleResponse(response);
 
       if (!response.ok) {
         const errorData = await response.json();

@@ -15,7 +15,6 @@ export default function Sidebar() {
     { name: 'Accueil', icon: '🏠', path: '/dashboard' },
     { name: 'Comptes', icon: '💳', path: '/accounts' },
     { name: 'Catégories', icon: '🏷️', path: '/categories' },
-    { name: 'Transactions', icon: '📊', path: '/transactions' },
     { name: 'Paramètres', icon: '⚙️', path: '/settings' },
   ];
 
@@ -33,7 +32,7 @@ export default function Sidebar() {
 
       <nav className="flex-1 p-4 space-y-2">
         {menuItems.map((item) => {
-          const isDisabled = item.path === '/transactions' || item.path === '/settings';
+          const isDisabled = item.path === '/transactions';
           return (
             <button
               key={item.path}

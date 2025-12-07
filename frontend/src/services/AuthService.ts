@@ -99,4 +99,11 @@ export class AuthService {
     }
     return {};
   }
+
+  handleUnauthorized(): void {
+    this.logout();
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+  }
 }

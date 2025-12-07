@@ -91,7 +91,7 @@ export default function CategoriesPage() {
           </div>
         ) : categories.length === 0 ? (
           <div className="bg-white rounded-lg border-2 border-black p-12 text-center">
-            <p className="text-xl text-gray-600 mb-4">Vous n'avez pas encore de catégorie</p>
+            <p className="text-xl text-gray-600 mb-4">Vous n&apos;avez pas encore de catégorie</p>
             <p className="text-gray-500">Créez votre première catégorie pour organiser vos dépenses</p>
           </div>
         ) : (

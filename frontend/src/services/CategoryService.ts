@@ -1,4 +1,5 @@
 import { Category, ICategory } from '../models/Category';
+import { AuthService } from './AuthService';
 
 interface CreateCategoryData {
   name: string;
@@ -14,9 +15,11 @@ interface UpdateCategoryData {
 
 export class CategoryService {
   private readonly apiUrl: string;
+  private authService: AuthService;
 
-  constructor(apiUrl: string = 'http://localhost:3001/api') {
+  constructor(apiUrl: string = 'http://localhost:3001/api', authService?: AuthService) {
     this.apiUrl = apiUrl;
+    this.authService = authService || new AuthService(apiUrl);
   }
 
   private getAuthHeader(): Record<string, string> {
@@ -29,6 +32,12 @@ export class CategoryService {
     return {};
   }
 
+  private handleResponse(response: Response): void {
+    if (response.status === 401) {
+      this.authService.handleUnauthorized();
+    }
+  }
+
   async createCategory(data: CreateCategoryData): Promise<Category> {
     try {
       const response = await fetch(`${this.apiUrl}/categories`, {
@@ -39,6 +48,8 @@ export class CategoryService {
         },
         body: JSON.stringify(data),
       });
+
+      this.handleResponse(response);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -65,6 +76,8 @@ export class CategoryService {
         },
       });
 
+      this.handleResponse(response);
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to fetch categories');
@@ -89,6 +102,8 @@ export class CategoryService {
           ...this.getAuthHeader(),
         },
       });
+
+      this.handleResponse(response);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -116,6 +131,8 @@ export class CategoryService {
         body: JSON.stringify(data),
       });
 
+      this.handleResponse(response);
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to update category');
@@ -140,6 +157,8 @@ export class CategoryService {
           ...this.getAuthHeader(),
         },
       });
+
+      this.handleResponse(response);
 
       if (!response.ok) {
         const errorData = await response.json();

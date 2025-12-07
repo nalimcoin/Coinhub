@@ -10,7 +10,7 @@ export default function DashboardPage() {
 
         <div className="bg-white rounded-lg border-2 border-black p-8">
           <p className="text-xl text-gray-600">Bienvenue sur CoinHub!</p>
-          <p className="text-gray-500 mt-4">Utilisez le menu à gauche pour naviguer dans l'application.</p>
+          <p className="text-gray-500 mt-4">Utilisez le menu à gauche pour naviguer dans l&apos;application.</p>
         </div>
       </div>
     </Layout>
